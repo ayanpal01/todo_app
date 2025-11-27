@@ -4,24 +4,55 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 class TodoTile extends StatelessWidget {
   final String taskname;
   final bool taskCompleted;
-  Function(bool?)? onChanged;
-  Function(BuildContext)? deleteTask;
+  final String createdDate;
+  final Function(bool?)? onChanged;
+  final Function(BuildContext)? deleteTask;
+  final Function(BuildContext)? editTask;
 
-  TodoTile({
+  const TodoTile({
     super.key,
     required this.taskname,
     required this.taskCompleted,
+    required this.createdDate,
     required this.onChanged,
     required this.deleteTask,
+    required this.editTask,
   });
+
+  String _formatDate(String dateString) {
+    DateTime date = DateTime.parse(dateString);
+    DateTime now = DateTime.now();
+    Duration diff = now.difference(date);
+
+    if (diff.inDays == 0) {
+      return 'Today ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+    } else if (diff.inDays == 1) {
+      return 'Yesterday';
+    } else if (diff.inDays < 7) {
+      return '${diff.inDays} days ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 24, right: 24, top: 24),
       child: Slidable(
+        startActionPane: ActionPane(
+          motion: const StretchMotion(),
+          children: [
+            SlidableAction(
+              onPressed: editTask,
+              backgroundColor: Colors.green,
+              icon: Icons.edit,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ],
+        ),
         endActionPane: ActionPane(
-          motion: StretchMotion(),
+          motion: const StretchMotion(),
           children: [
             SlidableAction(
               onPressed: deleteTask,
@@ -39,21 +70,33 @@ class TodoTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // chechbox
+              // checkbox
               Checkbox(
                 onChanged: onChanged,
                 value: taskCompleted,
                 activeColor: Colors.black,
               ),
-              // text
-              Text(
-                taskname,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w400,
-                  decoration: taskCompleted
-                      ? TextDecoration.lineThrough
-                      : TextDecoration.none,
+              // text and date
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      taskname,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        decoration: taskCompleted
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatDate(createdDate),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                    ),
+                  ],
                 ),
               ),
             ],
