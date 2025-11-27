@@ -23,13 +23,36 @@ class _HomeState extends State<Home> {
   }
 
   final _controller = TextEditingController();
+
+  void savenewTask() {
+    if (_controller.text.isNotEmpty) {
+      setState(() {
+        todoList.add([_controller.text, false]);
+        _controller.clear();
+        Navigator.of(context).pop();
+      });
+    }
+  }
+
   void createnewTask() {
     showDialog(
       context: context,
       builder: (context) {
-        return DialogBox(controller: _controller);
+        return DialogBox(
+          controller: _controller,
+          onSave: savenewTask,
+          onCancel: () {
+            Navigator.of(context).pop();
+          },
+        );
       },
     );
+  }
+
+  void deleteTTask(int index) {
+    setState(() {
+      todoList.removeAt(index);
+    });
   }
 
   @override
@@ -56,6 +79,7 @@ class _HomeState extends State<Home> {
             onChanged: (value) {
               checkBoxChanged(value, index);
             },
+            deleteTask: (context) => deleteTTask(index),
           );
         },
       ),
